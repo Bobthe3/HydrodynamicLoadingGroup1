@@ -169,3 +169,73 @@ Fm_max = FmVerticalProjection / sinAlpha
 print("Value of Fm_max: ", Fm_max)
 
 print("--------------------------------")
+
+#-------------------------
+#Part 1b - KC and maximum vertical wave-induced drag and inertia forces
+# Vertical velocity:      w     = a w  sinh[k(z+d)] / sinh(kd) * sin(wt)
+# Vertical acceleration:  dw/dt = a w^2 sinh[k(z+d)] / sinh(kd) * cos(wt)
+
+###########################################
+print("\nPart 1b i - Vertical Beam")
+
+# w acts along the axis of the column. Morison drag and inertia only act
+# perpendicular to a member's axis, so there is no vertical force on the column.
+print("Vertical flow is parallel to the column axis: no vertical drag or inertia force")
+print("--------------------------------\n")
+
+###########################################
+print("Part 1b ii - Horizontal Beam")
+
+# w is fully perpendicular to the horizontal beam, evaluated at the beam depth z = -35
+wMaxHorizontal = a * omega * np.sinh(k * (d + HorizontalBeamDepth)) / np.sinh(k * d)
+print("Value of w max at beam depth: ", wMaxHorizontal)
+
+HorizontalKCVertical = wMaxHorizontal * WavePeriod / HorizontalBeamDiameter
+print("Value of Horizontal KC (vertical): ", HorizontalKCVertical)
+
+# Drag: 1/2 Cd rho D L w^2
+Fd_max_vertical = 0.5 * Cd * Rho * HorizontalBeamDiameter * HorizontalBeamLength * wMaxHorizontal**2
+print("Value of vertical Fd_max: ", Fd_max_vertical)
+
+# Inertia: Cm rho (pi D^2 / 4) L * dw/dt max at the beam depth
+dwdtMaxHorizontal = a * omega**2 * np.sinh(k * (d + HorizontalBeamDepth)) / np.sinh(k * d)
+Fi_max_vertical = Cm * Rho * np.pi * HorizontalBeamDiameter**2 / 4 * HorizontalBeamLength * dwdtMaxHorizontal
+print("Value of vertical Fi_max: ", Fi_max_vertical)
+print("--------------------------------\n")
+
+###########################################
+print("Part 1b iii - Diagonal Beam")
+
+# Only the component of w perpendicular to the beam loads it: w*cos(alpha)
+# KC uses that perpendicular component at SWL (found in part 1a iii)
+DiagonalKCVertical = wPerpendicular * WavePeriod / DiagonalBeamDiameter
+print("Value of perpendicular component of w at SWL: ", wPerpendicular)
+print("Value of Diagonal KC (vertical): ", DiagonalKCVertical)
+
+# Drag: force per unit length perpendicular to the beam = 1/2 Cd rho D (w cos(alpha))^2
+# w is max when sin(wt) = 1, which is when eta = 0, so the beam is wet from z = -33.5 to 0
+# integral of sinh^2[k(z+d)] dz = [sinh(2k(z+d)) / 4k - z/2]
+dragIntegralVertical = (np.sinh(2 * k * (0 + d)) - np.sinh(2 * k * (zBottom + d))) / (4 * k) - (0 - zBottom) / 2
+print("Value of vertical drag integral: ", dragIntegralVertical)
+
+# Perpendicular force over the vertical projection, then / sin(alpha) for length along the beam
+FdPerpendicular = 0.5 * Cd * Rho * DiagonalBeamDiameter * a**2 * omega**2 / np.sinh(k * d)**2 * cosAlpha**2 * dragIntegralVertical / sinAlpha
+print("Value of Fd perpendicular to beam: ", FdPerpendicular)
+
+# Vertical component of the perpendicular force
+Fd_max_vertical = FdPerpendicular * cosAlpha
+print("Value of vertical Fd_max: ", Fd_max_vertical)
+
+# Inertia: force per unit length perpendicular to the beam = Cm rho (pi D^2 / 4) dw/dt cos(alpha)
+# dw/dt is max when cos(wt) = 1, the wave crest (eta = 6 > 5.5), so the whole beam is submerged
+# integral of sinh[k(z+d)] dz = [cosh(k(z+d)) / k], z = -33.5 to 5.5
+inertiaIntegralVertical = (np.cosh(k * (zTop + d)) - np.cosh(k * (zBottom + d))) / k
+print("Value of vertical inertia integral: ", inertiaIntegralVertical)
+
+FmPerpendicular = Cm * Rho * np.pi * DiagonalBeamDiameter**2 / 4 * a * omega**2 / np.sinh(k * d) * cosAlpha * inertiaIntegralVertical / sinAlpha
+print("Value of Fm perpendicular to beam: ", FmPerpendicular)
+
+Fm_max_vertical = FmPerpendicular * cosAlpha
+print("Value of vertical Fm_max: ", Fm_max_vertical)
+
+print("--------------------------------")
